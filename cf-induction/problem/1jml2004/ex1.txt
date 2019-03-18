@@ -1,0 +1,40 @@
+%%%
+% Date: 2012/06/21
+% Made by Yoshitaka Yamamoto
+% 
+% Reference: Example in Page 110 of the following:
+% K. Inoue
+% Induction as consequence finding
+% Journal of Machine Learning, 55 (2004)
+%   
+%
+%%%
+
+%%%
+% Mode declarations
+%%%
+
+modeh(1, mortal(+life)).
+modeb(1, human(+life)).
+
+%%%
+% Type of variables
+%%%
+
+type(s, life).
+type(god, life).
+
+
+% Background theory B
+
+cnf(an, bg, [ human(s) ]).
+
+cnf(an, bg, [ -mortal(god) ]).
+
+% Examples E
+
+cnf(an, obs, [ mortal(s) ]).
+
+
+% Target Hypothesis H
+% [mortal(X_0) <= human(X_0)]

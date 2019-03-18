@@ -1,0 +1,55 @@
+%%%
+% Date: 2012/06/21
+% Made by Yoshitaka Yamamoto
+% 
+% Reference: Example12 in Page 126 of the following:
+% Y. Yamamoto, K. Inoue and K. Iwanuam. 
+% Inverse subsumption for complete explanatory induction
+% Journal of Machine Learning, 86 (2012)
+%   
+%
+%%%
+
+%%%
+% Mode declarations
+%%%
+
+modeh(1, arc(#node, #node)).
+modeh(1, path(+node, +node)).
+modeb(1, arc(+node, +node)).
+modeb(1, path(+node, +node)).
+
+
+%%%
+% Type (Seeds) of variables
+%%%
+
+type(a, node).
+type(b, node).
+type(c, node).
+
+induction_field([+-arc(b, c), +-path(b, c)]).
+
+
+%%%
+% Background theory B
+%%%
+
+cnf(an, bg, [ arc(a, b) ]).
+cnf(an, bg, [ -arc(X, Y), -path(Y, Z), path(X, Z) ]).
+%cnf(an, bg, [ -arc(X, X) ]).
+%cnf(an, bg, [ -path(X, X) ]).
+
+% Examples E
+
+cnf(an, obs, [ path(a, c) ]).
+
+
+% Target hypothesis
+
+% [arc(b, c)]
+% [path(X_0, X_1) <= arc(X_0, X_1)]
+
+% Command
+
+% java ki.CF problem/1jml2012/ex3.txt

@@ -1,0 +1,9 @@
+cnf(un,pos,[-e(sk1), -o(sk2)]).
+cnf(un,pos,[-e(sk1), o(sk2)]).
+cnf(un,pos,[e(sk1), -o(sk2)]).
+cnf(un,pos,[e(sk1), o(sk2)]).
+cnf(un,neg,[e(sk1), o(sk2)]).
+cnf(un,neg,[e(sk1), -o(sk2)]).
+cnf(un,neg,[-e(sk1), o(sk2)]).
+cnf(un,neg,[-e(sk1), -o(sk2)]).
+induction_field([+-e(X_1), +-o(X_2)],length=2,size=2).

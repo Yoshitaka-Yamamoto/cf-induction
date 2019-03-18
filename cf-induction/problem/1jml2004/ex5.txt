@@ -1,0 +1,28 @@
+%%%
+% Date: 2012/06/27
+% Made by Yoshitaka Yamamoto
+% 
+% Reference: Example 5.2 in Page 127 of the following:
+% K. Inoue
+% Induction as consequence finding
+% Journal of Machine Learning, 55 (2004)
+%   
+%
+%%%
+
+
+modeb(1, white(+swan)).
+modeb(1, black(-swan)).
+
+type(a, swan).
+
+cnf(an, bg, [ white(a) ] ).
+cnf(an, obs,[ -black(a) ] ).
+
+%induction_field( length[2:2], size[1:1] ).
+
+% Target Hypothesis
+% [-white(X_0), -black(X_0)]
+
+% Command ava ki.CF problem/1jml2004/ex5.txt -onInd
+

@@ -1,0 +1,31 @@
+%%%
+% Date: 2012/5/21
+% Made by Yoshitaka Yamamoto
+%%%
+
+modeh(1, odd(+number)).
+modeb(1, even(-number)).
+modeb(1, suc(+number, -number)).
+
+type(0, number).
+type(1, number).
+type(2, number).
+type(3, number).
+type(4, number).
+type(5, number).
+
+cnf(an, bg, [ suc(0, 1) ] ).
+cnf(an, bg, [ suc(1, 2) ] ).
+cnf(an, bg, [ suc(2, 3) ] ).
+cnf(an, bg, [ suc(3, 4) ] ).
+cnf(an, bg, [ suc(4, 5) ] ).
+
+cnf(an, bg, [ even(0) ] ).
+cnf(an, bg, [ -odd(X), -suc(X, Y), even(Y) ] ).
+cnf(an, bg, [ -odd(0)]).
+
+cnf(an, obs,[ odd(5) ] ).
+
+% Target Hypothesis
+% [odd(X_0), -even(X_1), -suc(X_1, X_0)]
+

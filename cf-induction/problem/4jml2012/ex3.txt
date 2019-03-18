@@ -1,0 +1,44 @@
+%%%
+% Date: 2012/06/21
+% Made by Yoshitaka Yamamoto
+% 
+% Reference: Example6 in Page 123 of the following:
+% Y. Yamamoto, K. Inoue and K. Iwanuam. 
+% Inverse subsumption for complete explanatory induction
+% Journal of Machine Learning, 86 (2012)
+%   
+%
+%%%
+
+%%%
+% Mode declarations
+%%%
+
+modeh(1, p(+term)).
+modeb(1, f(-term, +term)).
+modeb(1, p(+term)).
+
+
+%%%
+% Type of variables
+%%%
+
+type(a, term).
+type(b, term).
+type(c, term).
+
+% Background theory B
+
+cnf(an, bg, [ p(a) ]).
+
+cnf(an, bg, [ f(a, b) ]).
+cnf(an, bg, [ f(b, c) ]).
+
+% Examples E
+
+cnf(an, obs, [ p(c) ]).
+
+% Target hypothesis
+% p(Y) <= f(X, Y) and p(X) 
+% Command
+% java ki.CF problem/4jml2012/ex2.txt -onInd

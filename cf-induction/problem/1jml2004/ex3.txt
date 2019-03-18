@@ -1,0 +1,43 @@
+%%%
+% Date: 2012/06/27
+% Made by Yoshitaka Yamamoto
+% 
+% Reference: Example 4.3 in Page 122 of the following:
+% K. Inoue
+% Induction as consequence finding
+% Journal of Machine Learning, 55 (2004)
+%   
+%
+%%%
+
+
+
+modeh(1, odd(+number)).
+modeb(1, even(-number)).
+modeb(1, suc(+number, -number)).
+
+type(0, number).
+type(1, number).
+type(2, number).
+type(3, number).
+
+cnf(an, bg, [ suc(0, 1) ] ).
+cnf(an, bg, [ suc(1, 2) ] ).
+cnf(an, bg, [ suc(2, 3) ] ).
+
+cnf(an, bg, [ even(0) ] ).
+cnf(an, bg, [ -odd(0) ]).
+cnf(an, bg, [ -odd(X), -suc(X, Y), even(Y) ] ).
+
+
+cnf(an, obs,[ odd(3) ] ).
+
+induction_field( length[0:10], size[1:1] ).
+
+% Target Hypothesis
+% [odd(X_0), -even(X_1), -suc(X_1, X_0)]
+
+% Command
+% java ki.CF problem/1jml2004/ex3.txt
+
+

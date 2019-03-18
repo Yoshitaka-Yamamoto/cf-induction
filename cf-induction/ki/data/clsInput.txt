@@ -1,0 +1,16 @@
+cnf(an, carc, [+suc[0,1]]).
+cnf(an, carc, [+plus[0,3,3]]).
+cnf(an, carc, [+plus[0,0,0]]).
+cnf(an, carc, [+plus[4,0,4]]).
+cnf(an, carc, [+plus[0,4,4]]).
+cnf(an, carc, [+plus[0,2,2]]).
+cnf(an, carc, [+plus[1,0,1]]).
+cnf(an, carc, [+plus[0,5,5]]).
+cnf(an, carc, [+plus[2,0,2]]).
+cnf(an, carc, [+plus[3,0,3]]).
+cnf(an, carc, [+plus[5,0,5]]).
+cnf(an, carc, [+suc[4,5]]).
+cnf(an, carc, [+suc[2,3]]).
+cnf(an, carc, [+plus[0,1,1]]).
+cnf(an, carc, [+suc[1,2]]).
+cnf(an, carc, [+suc[3,4]]).

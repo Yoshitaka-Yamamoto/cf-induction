@@ -1,0 +1,49 @@
+%%%
+% Date: 2012/06/21
+% Made by Yoshitaka Yamamoto
+% 
+% Reference: Example in Page 121 of the following:
+% K. Inoue
+% Induction as consequence finding
+% Journal of Machine Learning, 55 (2004)
+%
+%%%
+
+%%%
+% Mode declarations
+%%%
+
+modeh(1, cuddly_pet(+life)).
+modeh(1, small(+life)).
+modeb(1, fluffy(+life)).
+modeb(1, cat(+life)).
+modeb(1, pet(+life)).
+
+
+%%%
+% Type of variables
+%%%
+
+type(sk1, life).
+type(sk2, life).
+type(sk3, life).
+
+%induction_field( length[2:2], size[1:1] ).
+
+% Background theory B
+
+cnf(an, bg, [ -cat(X), pet(X) ]).
+cnf(an, bg, [ -small(X), -fluffy(X), -pet(X), cuddly_pet(X) ]).
+
+% Examples E
+
+cnf(an, obs, [ -fluffy(X), -cat(X), cuddly_pet(X) ]).
+
+% Target hypothesis
+% [small(X_0), -fluffy(X_0), -pet(X_0)]
+
+% Command
+% %java ki.CF problem/1jml2004/ex2-1.txt -e -r 0.6 -onInd 
+%
+
+

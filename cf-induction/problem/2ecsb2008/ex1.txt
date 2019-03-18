@@ -1,0 +1,66 @@
+%%%
+% Date: 2012/06/28
+% Made by Yoshitaka Yamamoto
+% 
+% Reference: Example of the first simple pathway in the following:
+% Y. Yamamoto, K. Inoue and K. Inoue.
+% Elements of Computational Systems Biology (2008)
+%
+%
+%%%
+
+%%%	
+% Mode declarations
+%%%
+
+modeh(1, con(+metabolite, #status)).
+modeh(1, act(#metabolite, #metabolite)).
+modeb(1, act(#metabolite, #metabolite)).
+modeh(1, act(+metabolite, +metabolite)).
+modeb(1, con(+metabolite, #status)).
+
+
+%%%
+% Type of variables
+%%%
+
+type(a, metabolite).
+type(b, metabolite).
+type(c, metabolite).
+type(d, metabolite).
+type(e, metabolite).
+type(up, status).
+type(down, status).
+
+
+%%%
+% Induction field
+%%%
+
+induction_field(
+length[0:3],
+[-con(b, up), con(c, down), con(e, down), -con(d, up),
+ +-act(d, e), act(a, b), act(b, d), +-act(b, c) ]).
+
+% Background theory B
+
+cnf(an, bg, [ reac(a, b) ]).
+cnf(an, bg, [ reac(b, d) ]).
+cnf(an, bg, [ reac(d, e) ]).
+cnf(an, bg, [ reac(e, c) ]).
+cnf(an, bg, [ reac(b, c) ]).
+cnf(an, bg, [ reac(c, b) ]).
+cnf(an, bg, [ -reac(Y, X), -reac(X, Z), -con(Y, up), -act(Y, X), act(X, Z), con(X, up) ]).
+cnf(an, bg, [ -reac(Y, X), -con(Y, down), -act(Y, X), con(X, down) ]). 
+cnf(an, bg, [ con(a, up) ]).
+cnf(an, bg, [ -con(X, up), -con(X, down) ]).
+
+
+% Examples E
+
+cnf(an, obs, [ con(d, up) ]).
+cnf(an, obs, [ con(c, down) ]).
+cnf(an, obs, [ con(e, down) ]).
+
+% Successful command: java ki.CF problem/2ecsb2008/ex1.txt -r 0.2 -onInd
+

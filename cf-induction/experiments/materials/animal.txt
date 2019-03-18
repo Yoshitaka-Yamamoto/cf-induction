@@ -1,0 +1,238 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% class/2 learns the class (mammal/fish/reptile/bird) of various animals.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Mode declarations
+
+%modeh(1,class(#animal,#class)).
+modeh(1,class(+animal,#class)).
+modeb(1,has_milk(+animal)).
+modeb(1,has_gills(+animal)).
+modeb(1,has_covering(+animal,#covering)).
+modeb(1,has_legs(+animal,#nat)).
+modeb(1,homeothermic(+animal)).
+modeb(1,has_eggs(+animal)).
+%modeh(1,has_milk(+animal)).
+%modeh(1,has_gills(+animal)).
+modeb(1,habitat(+animal,#habitat)).
+%modeb(1,class(+animal,#class)).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Types
+
+type(0, nat). type(2, nat). type(4, nat).
+type(dog, animal). type(dolphin, animal). type(platypus, animal). type(bat, animal).
+type(trout, animal). type(herring, animal). type(shark, animal). type(eel, animal).
+type(lizard, animal). type(crocodile, animal). type(t_rex, animal). type(turtle, animal).
+type(snake, animal). type(eagle, animal). type(ostrich, animal). type(penguin, animal).
+type(cat, animal). type(dragon, animal). type(girl, animal). type(boy, animal).
+type(mammal, class). type(fish, class). type(reptile, class). type(bird, class).
+type(hair, covering). type(none, covering). type(scales, covering). type(feathers, covering).
+type(land, habitat). type(water, habitat). type(air, habitat). type(caves, habitat).
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Positive examples
+
+cnf(an, obs, [class(dog,mammal)]).
+cnf(an, obs, [class(dolphin,mammal)]).
+cnf(an, obs, [class(platypus,mammal)]).
+cnf(an, obs, [class(bat,mammal)]).
+
+cnf(an, obs, [class(trout,fish)]).
+cnf(an, obs, [class(herring,fish)]).
+cnf(an, obs, [class(shark,fish)]).
+cnf(an, obs, [class(eel,fish)]).
+
+cnf(an, obs, [class(lizard,reptile)]).
+cnf(an, obs, [class(crocodile,reptile)]).
+cnf(an, obs, [class(t_rex,reptile)]).
+cnf(an, obs, [class(snake,reptile)]).
+cnf(an, obs, [class(turtle,reptile)]).
+
+cnf(an, obs, [class(eagle,bird)]).
+cnf(an, obs, [class(ostrich,bird)]).
+cnf(an, obs, [class(penguin,bird)]).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Negative examples treated as the background theory
+
+% :- class(X,mammal), class(X,fish).
+% :- class(X,mammal), class(X,reptile).
+% :- class(X,mammal), class(X,bird).
+% :- class(X,fish), class(X,reptile).
+% :- class(X,fish), class(X,bird).
+% :- class(X,reptile), class(X,bird).
+% :- class(eagle,reptile).
+
+cnf(an, bg, [-class(trout,mammal)]).
+cnf(an, bg, [-class(herring,mammal)]).
+cnf(an, bg, [-class(shark,mammal)]).
+cnf(an, bg, [-class(lizard,mammal)]).
+cnf(an, bg, [-class(crocodile,mammal)]).
+cnf(an, bg, [-class(t_rex,mammal)]).
+cnf(an, bg, [-class(turtle,mammal)]).
+cnf(an, bg, [-class(eagle,mammal)]).
+cnf(an, bg, [-class(ostrich,mammal)]).
+cnf(an, bg, [-class(penguin,mammal)]).
+
+
+cnf(an, bg, [has_milk(dog)]).
+cnf(an, bg, [has_milk(dolphin)]).
+cnf(an, bg, [has_milk(bat)]).
+cnf(an, bg, [has_milk(platypus)]).
+
+
+cnf(an, bg, [ -class(dog,fish)]).
+cnf(an, bg, [ -class(dolphin,fish)]).
+cnf(an, bg, [ -class(platypus,fish)]).
+cnf(an, bg, [ -class(bat,fish)]).
+cnf(an, bg, [ -class(lizard,fish)]).
+cnf(an, bg, [ -class(crocodile,fish)]).
+cnf(an, bg, [ -class(t_rex,fish)]).
+cnf(an, bg, [ -class(turtle,fish)]).
+cnf(an, bg, [ -class(eagle,fish)]).
+cnf(an, bg, [ -class(ostrich,fish)]).
+cnf(an, bg, [ -class(penguin,fish)]).
+
+
+cnf(an, bg, [has_gills(trout)]).
+cnf(an, bg, [has_gills(herring)]).
+cnf(an, bg, [has_gills(shark)]).
+cnf(an, bg, [has_gills(eel)]).
+
+
+
+cnf(an, bg, [ -class(dog,reptile)]).
+cnf(an, bg, [ -class(dolphin,reptile)]).
+cnf(an, bg, [ -class(platypus,reptile)]).
+cnf(an, bg, [ -class(bat,reptile)]).
+cnf(an, bg, [ -class(trout,reptile)]).
+cnf(an, bg, [ -class(herring,reptile)]).
+cnf(an, bg, [ -class(shark,reptile)]).
+cnf(an, bg, [ -class(eagle,reptile)]).
+cnf(an, bg, [ -class(ostrich,reptile)]).
+cnf(an, bg, [ -class(penguin,reptile)]).
+
+cnf(an, bg, [has_covering(trout,scales)]).
+cnf(an, bg, [has_covering(herring,scales)]).
+cnf(an, bg, [has_covering(lizard,scales)]).
+cnf(an, bg, [has_covering(crocodile,scales)]).
+cnf(an, bg, [has_covering(t_rex,scales)]).
+cnf(an, bg, [has_covering(snake,scales)]).
+cnf(an, bg, [has_covering(turtle,scales)]).
+
+
+
+
+cnf(an, bg, [ -class(dog,bird)]).
+cnf(an, bg, [ -class(dolphin,bird)]).
+cnf(an, bg, [ -class(platypus,bird)]).
+cnf(an, bg, [ -class(bat,bird)]).
+cnf(an, bg, [ -class(trout,bird)]).
+cnf(an, bg, [ -class(herring,bird)]).
+cnf(an, bg, [ -class(shark,bird)]).
+cnf(an, bg, [ -class(lizard,bird)]).
+cnf(an, bg, [ -class(crocodile,bird)]).
+cnf(an, bg, [ -class(t_rex,bird)]).
+cnf(an, bg, [ -class(turtle,bird)]).
+
+cnf(an, bg, [has_covering(eagle,feathers)]).
+cnf(an, bg, [has_covering(ostrich,feathers)]).
+cnf(an, bg, [has_covering(penguin,feathers)]).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Background knowledge
+
+cnf(an, bg, [has_covering(dog,hair)]).
+cnf(an, bg, [has_covering(dolphin,none)]).
+cnf(an, bg, [has_covering(platypus,hair)]).
+cnf(an, bg, [has_covering(bat,hair)]).
+cnf(an, bg, [has_covering(shark,none)]).
+cnf(an, bg, [has_covering(eel,none)]).
+
+
+cnf(an, bg, [has_legs(dog,4)]).
+cnf(an, bg, [has_legs(dolphin,0)]).
+cnf(an, bg, [has_legs(platypus,2)]).
+cnf(an, bg, [has_legs(bat,2)]).
+cnf(an, bg, [has_legs(trout,0)]).
+cnf(an, bg, [has_legs(herring,0)]).
+cnf(an, bg, [has_legs(shark,0)]).
+cnf(an, bg, [has_legs(eel,0)]).
+cnf(an, bg, [has_legs(lizard,4)]).
+cnf(an, bg, [has_legs(crocodile,4)]).
+cnf(an, bg, [has_legs(t_rex,4)]).
+cnf(an, bg, [has_legs(snake,0)]).
+cnf(an, bg, [has_legs(turtle,4)]).
+cnf(an, bg, [has_legs(eagle,2)]).
+cnf(an, bg, [has_legs(ostrich,2)]).
+cnf(an, bg, [has_legs(penguin,2)]).
+
+
+
+
+cnf(an, bg, [homeothermic(dog)]).
+cnf(an, bg, [homeothermic(dolphin)]).
+cnf(an, bg, [homeothermic(platypus)]).
+cnf(an, bg, [homeothermic(bat)]).
+cnf(an, bg, [homeothermic(eagle)]).
+cnf(an, bg, [homeothermic(ostrich)]).
+cnf(an, bg, [homeothermic(penguin)]).
+
+
+cnf(an, bg, [habitat(dog,land)]).
+cnf(an, bg, [habitat(dolphin,water)]).
+cnf(an, bg, [habitat(platypus,water)]).
+cnf(an, bg, [habitat(bat,air)]).
+cnf(an, bg, [habitat(bat,caves)]).
+cnf(an, bg, [habitat(trout,water)]).
+cnf(an, bg, [habitat(herring,water)]).
+cnf(an, bg, [habitat(shark,water)]).
+cnf(an, bg, [habitat(eel,water)]).
+cnf(an, bg, [habitat(lizard,land)]).
+cnf(an, bg, [habitat(crocodile,water)]).
+cnf(an, bg, [habitat(crocodile,land)]).
+cnf(an, bg, [habitat(t_rex,land)]).
+cnf(an, bg, [habitat(snake,land)]).
+cnf(an, bg, [habitat(turtle,water)]).
+cnf(an, bg, [habitat(eagle,air)]).
+cnf(an, bg, [habitat(eagle,land)]).
+cnf(an, bg, [habitat(ostrich,land)]).
+cnf(an, bg, [habitat(penguin,water)]).
+
+cnf(an, bg, [has_eggs(platypus)]).
+cnf(an, bg, [has_eggs(trout)]).
+cnf(an, bg, [has_eggs(herring)]).
+cnf(an, bg, [has_eggs(shark)]).
+cnf(an, bg, [has_eggs(eel)]).
+cnf(an, bg, [has_eggs(lizard)]).
+cnf(an, bg, [has_eggs(crocodile)]).
+cnf(an, bg, [has_eggs(t_rex)]).
+cnf(an, bg, [has_eggs(snake)]).
+cnf(an, bg, [has_eggs(turtle)]).
+cnf(an, bg, [has_eggs(eagle)]).
+cnf(an, bg, [has_eggs(ostrich)]).
+cnf(an, bg, [has_eggs(penguin)]).
+
+
+cnf(an, bg, [has_milk(cat)]).
+cnf(an, bg, [homeothermic(cat)]).
+
+
+% Target Hypothesis
+
+% [class(X_0, reptile), -has_covering(X_0, scales), -habitat(X_0, land)]
+% [class(X_0, mammal), -has_milk(X_0)]
+% [class(X_0, reptile), -has_legs(X_0, 4), -has_eggs(X_0)]
+% [class(X_0, bird), -has_covering(X_0, feathers)]
+% [class(X_0, fish), -has_gills(X_0)]
+
+% Command
+
+% java ki.CF problem/5animal/animal.txt -cp 0.2
+
+
+

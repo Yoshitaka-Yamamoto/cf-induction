@@ -1,0 +1,938 @@
+options {
+  // 各メソッドはオブジェクトの状態に依存する
+  STATIC = false;
+  // 領域記述には日本語が含まれるかもしれない
+  UNICODE_INPUT = true;
+  JAVA_UNICODE_ESCAPE = true;
+}
+
+PARSER_BEGIN(CFParser)
+
+/*
+ * $Id$ 
+ */
+
+package parser;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.LinkedList;
+
+import ki.Schema;
+import ki.InductionField;
+import ki.GeneStrategy;
+import ki.Clause;
+import ki.CFProblem;
+import ki.SymbolTable;
+import ki.TermTable;
+import ki.ClauseKind;
+
+/**
+ * 仮説発見問題 (CFProblem) 構文解析クラス
+ */
+public final class CFParser {
+	
+  /**
+   * 仮説発見問題の構文解析クラスを生成する
+   * @param fileName 構文解析するファイル名
+   */
+  private CFParser(String fileName) throws FileNotFoundException
+  {
+    this(new BufferedReader(new FileReader(fileName)));
+
+    // 構文解析中のファイル名を保存（エラー出力用）
+    this.fileName = new File(fileName).getName();
+    // 仮説発見問題の名前とする
+    this.problemName = fileName;
+  }
+
+  /**
+   * 指定のファイルを解析し，仮説発見問題を生成する
+   * @param fileName 構文解析するファイル名
+   */
+  public static CFProblem parse(String fileName)
+  {
+    try {
+      // 構文解析器生成
+      CFParser parser = new CFParser(fileName);
+      // 仮の仮説発見問題
+      CFP cfp = new CFP();
+      // 構文解析の実行
+      parser.parse(cfp);
+      
+      return new CFProblem(parser.problemName,
+                                           cfp.getInputClauses(), 
+                                           cfp.getInductionField(),
+                                           cfp.getGeneStrategy());
+
+                                            
+    } catch (FileNotFoundException e) {
+      System.err.println(e.getMessage());
+      System.exit(-1);
+    }
+
+    return null;    // ここにくることはない
+  }
+
+  /**
+   * 指定のファイルリストを解析し，仮説発見問題を生成する
+   * @param fileNames 構文解析するファイル名のリスト
+   */
+  public static CFProblem parse(List fileNames)
+  {
+    try {
+      // 問題の名前
+      String problemName = null;
+      // 仮の仮説発見問題
+      CFP cfp = new CFP();
+      
+      // すべてのファイルを解析
+      for (int i=0; i < fileNames.size(); i++) {
+        String fileName = (String)fileNames.get(i);
+        // 構文解析器生成
+        CFParser parser = new CFParser(fileName);
+        // 構文解析
+        parser.parse(cfp);
+        
+        // 先頭のファイルの名前を問題名とする
+        if (problemName == null)
+          problemName = parser.problemName;
+      }
+
+      return new CFProblem(problemName,
+                                           cfp.getInputClauses(), 
+                                           cfp.getInductionField(), cfp.getGeneStrategy());
+    } catch (FileNotFoundException e) {
+      System.err.println(e.getMessage());
+      System.exit(-1);
+    }
+
+    return null;    // ここにくることはない
+  }
+
+  /**
+   * 仮説発見問題を構文解析する
+   * @param cfp 仮の仮説発見問題
+   */
+  public void parse(CFP cfp)
+  {
+    try {
+      problem(cfp);
+    } catch (ParseException e) {
+			System.err.println(fileName + ": " + e.getMessage());
+      System.exit(1);
+    }
+  }
+
+  /**
+   * 仮説発見問題を構文解析する（ストリームをコンストラクタに渡した場合に利用するメソッド）
+   * @return 仮説発見問題
+   */
+  public CFProblem parse()
+  {
+      // 仮の仮説発見問題
+      CFP cfp = new CFP();
+      // 構文解析の実行
+      parse(cfp);
+      
+      return new CFProblem(problemName,
+                                           cfp.getInputClauses(), 
+                                           cfp.getInductionField(), cfp.getGeneStrategy());
+  }
+
+  /**
+   * 検査用 main 関数
+   * @param arg[] コマンド行引数の配列
+   */
+  static public void main(String[] args) 
+  {
+    try {
+			if ( args.length == 1 ) {
+        System.out.println(parse(args[0]));
+      }
+			else {
+        System.out.println("Usage: java parser.CFParser problem.cf");
+      }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+  }  
+
+  /**
+   * 複数ファイルを解析するために，入力節集合，生成領域，探索戦略を保持するクラス
+   */
+  private static final class CFP {
+
+    /**
+     * 入力節を追加する
+     * @param c 入力節
+     */
+    public void addInputClause(Clause c)
+    {
+      inputClauses.add(c);
+    }
+
+    /**
+     * 入力節集合を取得する
+     * @return 入力節集合
+     */
+    public LinkedList getInputClauses()
+    {
+      return inputClauses;
+    }
+
+    /**
+     * 仮説発見領域を登録する（上書きするので注意）
+     * @param inductionField 登録する仮説発見領域
+     */
+    public void setInductionField(InductionField inductionField)
+    {
+      this.inductionField = inductionField;
+    }
+
+    /**
+     * 仮説発見領域を取得する
+     * @return 仮説発見領域
+     */
+    public InductionField getInductionField()
+    {
+      return inductionField;
+    }
+
+    /**
+     * 戦略を登録する (上書きするので注意)
+     * @param geneStrategy 登録する戦略
+     */
+    public void setGeneStrategy(GeneStrategy geneStrategy)
+    {
+ 	this.geneStrategy = geneStrategy;
+    }
+
+    /**
+     * 戦略を取得する
+     * @return 戦略
+     */
+    public GeneStrategy getGeneStrategy()
+    {
+	return geneStrategy;
+    }
+
+    /** 入力節集合 */
+    private LinkedList<Clause> inputClauses = new LinkedList<Clause>();
+    /** 仮説発見領域 */
+    private InductionField inductionField = null;
+    /** 戦略 */
+    private GeneStrategy geneStrategy = null;
+  }
+
+  /**
+   * 節内の変数名を管理するためだけのテーブル
+   */
+  private static final class VarNameTable {
+
+    /**
+     * 変数を登録する
+     * @param name 登録する変数
+     * @return 変数番号
+     */
+    public int put(String name)
+    {
+      //System.out.println("name is"+name);
+      // 検索
+      int id = startID;
+      names[maxID + 1] = name;    // 番兵
+      while (!names[id].equals(name))
+        id++;
+
+      // 登録済み？
+      if ((maxID + 1) != id)
+        return id;
+
+      // 新規登録
+      maxID++;
+
+      // 配列のサイズを増やしておく
+      if (names.length == maxID + 2) {
+        String[] dest = new String[ names.length * 2 ];
+        System.arraycopy(names, 0, dest, 0, names.length);
+        names = dest;
+      }
+      
+      return maxID;
+    }
+    
+    /**
+     * 無名変数を登録する
+     * @return 変数番号
+     */
+    public int put()
+    {
+      // 新規登録
+      maxID++;
+      names[maxID] = "_";
+
+      // 配列のサイズを増やしておく
+      if (names.length == maxID + 2) {
+        String[] dest = new String[ names.length * 2 ];
+        System.arraycopy(names, 0, dest, 0, names.length);
+        names = dest;
+      }
+      
+      return maxID;
+    }
+    
+    public String getVariable(int id) {
+	String varName = names[id];
+	return varName;
+    }
+	
+    
+    /**
+     * 登録されている変数の数を返す
+     * @return 登録されている変数の数
+     */
+    public int size()
+    {
+      return maxID + 1;
+    }
+
+    /**
+     * 変数テーブルをクリアする
+     */
+    public void clear()
+    {
+      startID = maxID +1;
+    }
+
+    /**
+     * このオブジェクトを表す文字列を取得する
+     * @return このオブジェクトを表す文字列
+     */
+    public String toString()
+    {
+      StringBuffer str = new StringBuffer(512);
+      
+      for (int i=0; i <= maxID; i++) 
+        str.append( i + " : " + names[i] + "\n" );
+      
+      return str.toString();
+    }
+
+    /** 変数名を保持する配列 */
+    private String[] names = new String[INITIAL_CAPACITY];
+    /** 最大の変数 ID */
+    private int maxID = -1;
+	/** その時点までの変数の数を示すID　**/
+	private int startID = 0;
+
+    /** 初期変数配列サイズ */
+    private final static int INITIAL_CAPACITY = 100;
+  }
+
+  /** 節内の変数を管理するためだけの変数テーブル */
+  private VarNameTable varNameTable = new VarNameTable();
+
+  /** 記号テーブル */
+  private SymbolTable symbolTable = SymbolTable.getSymbolTable();
+
+  /** 項テーブル　*/
+  private TermTable termTable = TermTable.getTermTable();
+  
+  /** 構文解析中のファイル名 */
+  private String fileName = null;
+  /** 仮説発見問題の名前 */
+  private String problemName = null;
+}
+
+PARSER_END(CFParser)
+
+SKIP : 
+{
+	" "  |
+  "\t" |
+  "\n" |
+  "\r" |
+  <"%" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>  |
+  <"#" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>  |
+  <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")> |
+  <"/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/">
+}
+
+TOKEN : /* 予約語 */
+{
+ <INCLUDE:                         "include"                        > |
+ <CNF:                       	   "cnf"                            > |
+ <AXIOM:                           "axiom"                          > |
+ <CARC:                            "carc"                           > |
+ <OBSERVATIONS:                    "obs"                            > |
+ <BACKGROUND:                      "bg"                             > |
+ <HYPOTHESIS:                      "hypo"                           > |
+ <INDUCTION_FIELD:                 "induction_field"                > |
+ <GENE_STRATEGY:                   "search_strategy"                > |
+ <COPY:                            "copy"                           > |
+ <SIZE:                            "size"                           > |
+ <LENGTH:                          "length"                         > |
+ <ALL:                             "all"                            > |
+ <POS_ALL:                         "pos_all"                        > |
+ <NEG_ALL:                         "neg_all"                        > |
+ <POSITIVE:                        "pos"                       > |
+ <NEGATIVE:                        "neg"                       > 
+}
+
+TOKEN : /* 識別子 */
+{
+  <CONSTANT:   (<LOWERCASE>)(<LETTER> | <DIGIT>)*        > |
+  <INTEGER:    (<DIGIT>)+                                > |
+  <POS_ACTUAL_NUM: (<INTEGER>)(<PERIOD>)(<INTEGER>)      > |
+  <NEG_ACTUAL_NUM: (<NEG>)(<INTEGER>)(<PERIOD>)(<INTEGER>)>|
+  <VARIABLE:   (<UPPERCASE>) (<LETTER> | <DIGIT> | <POS> | <NEG>)* > |
+  <UNNAMED:    ("_")                                     > |
+  <#LOWERCASE: ["a"-"z"]                                 > |
+  <#LETTER:    ["A"-"Z","_","a"-"z"]                     > |
+  <#DIGIT:     ["0"-"9"]                                 > |
+  <#UPPERCASE: ["A"-"Z"]                                 > |
+  <POS:        ("+"|"++")                                > |
+  <NEG:        ("-"|"--")                                > |
+  <POS_NEG:    ("+-"|"++--")                             > |
+  <PERIOD:     (".")                                     > |
+  <FILENAME:   ("'" (~["'"])+ "'")                       > //  Token は排他的である必要があるため
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// 仮説発見問題の構文解析
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * 仮説発見問題を構文解析する
+ * @param cfp  仮の仮説発見問題
+ */
+void problem(CFP cfp) :
+{
+  Clause inputClause = null;    // 入力節
+}
+{
+  (
+   ( inputClause = inputClause() ) { cfp.addInputClause(inputClause); } 
+   |
+   ( inductionField(cfp) )
+   |
+   ( geneStrategy(cfp) )
+  ) +
+  <EOF>
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// 別ファイルの読み込み
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * 別ファイルの読み込み
+ * @param cfp  仮の仮説発見問題
+ */
+void include(CFP cfp) :
+{
+  Token  fileNameToken = null;    // ファイル名トークン
+  String fileName      = null;    // ファイル名
+  String fullPath      = null;    // フルパス
+}
+{
+  <INCLUDE> "(" fileNameToken = <FILENAME> ")" <PERIOD>
+  {
+    try {
+      // ファイル名から先頭と末尾の "'" を取り除く
+      fileName = fileNameToken.image.substring(1, fileNameToken.image.length() - 1);
+
+      // 指定のファイルを解析する
+      new CFParser(fullPath).parse(cfp);
+
+    } catch (FileNotFoundException e) {
+      throw new ParseException("File '" + fullPath + "' is not found at line " + 
+                               token.beginLine + ", column " +  token.beginColumn + ".");
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// 入力節の構文解析
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * 入力節の構文解析
+ */
+Clause inputClause() :
+{
+  String name   = null;    // 節の名前
+  int    kind   = 0;       // 節の種類
+  Clause clause = null;    // 節
+}
+{
+  <CNF> "(" name = clauseName() "," kind = clauseKind() "," clause = clause(name, kind) ")" <PERIOD>
+  {
+    return clause;
+  }
+}
+
+/**
+ * 節の名前の構文解析
+ */
+String clauseName() :
+{}
+{
+  <CONSTANT> { return token.image; }
+}
+
+/**
+ * 節の種類の構文解析
+ */
+int clauseKind() :
+{}
+{
+  <HYPOTHESIS>   { return ClauseKind.HYPOTHESIS;   } |
+  <OBSERVATIONS> { return ClauseKind.OBSERVATIONS; } |
+  <BACKGROUND>   { return ClauseKind.BACKGROUND;   } |
+  <CARC> { return ClauseKind.CARC;} |
+  <POSITIVE> { return ClauseKind.POSITIVE; } |
+  <NEGATIVE> { return ClauseKind.NEGATIVE; }  	
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// 戦略の構文解析
+///////////////////////////////////////////////////////////////////////////////
+
+
+/**
+ * 戦略の構文解析
+ * @param cfp  仮の仮説発見問題
+ */
+void geneStrategy(CFP cfp) :
+{
+  Token           begin           = null;                             // 開始行
+  GeneStrategy geneStrategy = new GeneStrategy();                // 戦略
+}
+{
+  begin = <GENE_STRATEGY> "(" 
+  (
+    geneStrategyArgs(geneStrategy) 
+  )
+  ")" <PERIOD>
+  {
+    // すでに戦略の指定がある場合は，エラーとする
+    if (cfp.getGeneStrategy() != null)
+      throw new ParseException("Redeclaration of the strategy at line " + begin.beginLine + " :\n" +
+                               "  " + geneStrategy);
+
+    // 戦略の登録
+    cfp.setGeneStrategy(geneStrategy);      
+  }
+}
+
+/**
+ * 戦略の引数の構文解析
+ * @param inductionField  仮説発見領域
+ */
+void geneStrategyArgs(GeneStrategy geneStrategy) :
+{}
+{
+  (  copy(geneStrategy) | geneTerms(geneStrategy) ) 
+  ( "," 
+    ( copy(geneStrategy) | geneTerms(geneStrategy) )    
+  )*
+}
+
+/**
+ * 最大コピー回数制限の構文解析
+ * @param geneStrategy  戦略
+ */
+void copy(GeneStrategy geneStrategy) :
+{
+  int num = 0;
+}
+{
+  <COPY>
+  (
+     "="  num = number() { geneStrategy.setMaxCopy(num    ); }
+  )
+}
+
+/**
+ * 項集合指定の構文解析
+ * @param geneStrategy  戦略
+ */
+void geneTerms(GeneStrategy geneStrategy) :
+{
+  geneStrategy.restrictTerms();
+}
+{
+  "[" 
+   geneTerm(geneStrategy) ("," geneTerm(geneStrategy) )* 
+
+  "]"
+}
+
+/**
+ * 項の構文解析
+ * @param geneStrategy  戦略
+ */
+void geneTerm(GeneStrategy geneStrategy) :
+{
+    Schema   schema  = null;    // 戦略で指定される項
+}
+{
+    schema = schema()
+    {
+      geneStrategy.addTerm(schema);
+    }
+ }
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// 仮説発見領域の構文解析
+///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * 仮説発見領域の構文解析
+ * @param cfp  仮の仮説発見問題
+ */
+void inductionField(CFP cfp) :
+{
+  Token           begin           = null;                             // 開始行
+  InductionField inductionField = new InductionField();               // 仮説発見領域
+}
+{
+  begin = <INDUCTION_FIELD> "(" 
+  (
+    inductionFieldArgs(inductionField) 
+  )
+  ")" <PERIOD>
+  {
+    // すでに仮説発見領域の指定がある場合は，エラーとする
+    if (cfp.getInductionField() != null)
+      throw new ParseException("Redeclaration of induction field at line " + begin.beginLine + " :\n" +
+                               "  " + inductionField);
+
+    // 仮説発見領域の登録
+    cfp.setInductionField(inductionField);      
+  }
+}
+
+/**
+ * 仮説発見領域の引数の構文解析
+ * @param inductionField  仮説発見領域
+ */
+void inductionFieldArgs(InductionField inductionField) :
+{}
+{
+  ( maxLength(inductionField) | maxSize(inductionField) | maxCopy(inductionField) | indPredicates(inductionField) ) 
+  ( "," 
+    ( maxLength(inductionField) | maxSize(inductionField) | maxCopy(inductionField) | indPredicates(inductionField) )    
+  )*
+}
+
+/**
+ * 仮説の最大長制限の構文解析
+ * @param inductionField  生成領域
+ */
+void maxLength(InductionField inductionField) :
+{
+  int num = 0;
+}
+{
+  <LENGTH>
+  (
+   "<"  num = number() { inductionField.setMaxLength(num-1); } |
+   "=" num = number() { inductionField.setMaxLength(num  ); }
+  )
+}
+
+/**
+ * 仮説の最大節数制限の構文解析
+ * @param inductionField  生成領域
+ */
+void maxSize(InductionField inductionField) :
+{
+  int num = 0;
+}
+{
+  <SIZE>
+  (
+   "<"  num = number() { inductionField.setMaxSize(num-1); } |
+   "=" num = number() { inductionField.setMaxSize(num  ); }
+  )
+}
+
+
+/**
+ * 最大コピー回数制限の構文解析
+ * @param inductionField  生成領域
+ */
+void maxCopy(InductionField inductionField) :
+{
+  int num = 0;
+}
+{
+  <COPY>
+  (
+   "<"  num = number() { inductionField.setMaxCopy(num - 1); } |
+   "="  num = number() { inductionField.setMaxCopy(num    ); }
+  )
+}
+
+/**
+ * 正整数の構文解析
+ */
+int number() :
+{}
+{
+  <INTEGER> 
+  {
+    return Integer.parseInt(token.image); 
+  } 
+}
+
+
+/**
+ * 述語指定の構文解析
+ * @param inductionField  生成領域
+ */
+void indPredicates(InductionField inductionField) :
+{}
+{
+  "[" 
+   (
+   <ALL>     { inductionField.allowAllPredicates();    } |
+   <POS_ALL> { inductionField.allowAllPosPredicates(); } |
+   <NEG_ALL> { inductionField.allowAllNegPredicates(); } |
+   ( indPredicate(inductionField) ("," indPredicate(inductionField) )* )  
+   )
+  "]"
+}
+
+/**
+ * 仮説発見領域の述語の構文解析
+ * @param inductionField  仮説発見領域
+ */
+void indPredicate(InductionField inductionField) :
+{
+	Token   name    = null;    // 名前
+    Schema   schema  = null;    // 生成領域で指定される述語
+	List    args    = null;    // 引数
+}
+{
+  (
+    (<POS>)? name = <CONSTANT> ( "(" args = schemaArgs() ")" ) ?
+    {
+      schema = Schema.createPosPredicate(symbolTable.put(name.image), args);
+      inductionField.addPredicate(schema);
+    }
+  )
+  |
+  (
+    <NEG> name = <CONSTANT> ( "(" args = schemaArgs() ")" ) ?
+    {
+      schema = Schema.createNegPredicate(symbolTable.put(name.image), args);
+      inductionField.addPredicate(schema);
+    }
+  )
+  |
+  (
+    <POS_NEG> name = <CONSTANT> ( "(" args = schemaArgs() ")" ) ?
+    {
+      schema = Schema.createPosNegPredicate(symbolTable.put(name.image), args);
+      inductionField.addPredicate(schema);
+    }
+  )
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// 節の構文解析
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * 節はリテラルの重複集合である．
+ * @param name 節の名前
+ * @param kind 節の種類
+ * @return 節
+ */
+Clause clause(String name, int kind) :
+{
+	List<Schema>   literals = new ArrayList<Schema>();	    // リテラルの集合
+	Schema literal  = null;                // リテラル
+  	// 節内の変数を管理するテーブルを初期化
+ 	varNameTable.clear();
+}
+{ 
+  "["
+          literal = literal() { literals.add(literal); }
+    ( "," literal = literal() { literals.add(literal); } ) *
+  "]"
+	{
+		return new Clause(name, kind, literals);
+	}
+}
+
+/** 
+ * リテラルは，正または負のスキーマである．
+ * @return リテラルスキーマ
+ */
+Schema literal() :
+{
+	Token name = null;
+	List  args = null;
+}
+{
+  (
+    (<POS>)? name = <CONSTANT> ( "(" args = schemaArgs() ")" ) ?
+  	{
+  		return Schema.createPosPredicate(symbolTable.put(name.image), args);
+  	}
+  )
+  |
+  (
+    <NEG> name = <CONSTANT> ( "(" args = schemaArgs() ")" ) ?
+    {
+      return Schema.createNegPredicate(symbolTable.put(name.image), args);
+    }
+  )
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// スキーマの構文解析
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * schemaArgs は述語もしくは関数の引数である
+ *   スキーマ "," スキーマ "," ... "," スキーマ
+ */
+List schemaArgs() :
+{
+  Schema s    = null;               // スキーマ
+  List<Schema>   args = new ArrayList<Schema>();    // 引数
+}
+{
+  s = schema() 
+  {
+    args.add(s);
+  }
+  ( "," s = schema() { args.add(s); } ) *
+  {
+    return args;
+  }
+}
+
+/**
+ * スキーマは以下の形式をしている：
+ *   simpleSchema   : 定数 or 変数
+ *   compoundSchema : 定数 "(" スキーマ "," ... "," スキーマ ")"
+ */
+Schema schema() :
+{
+  Schema s = null;
+}
+{
+  LOOKAHEAD( <CONSTANT> "(" ) s = compoundSchema() { return s; } |
+  LOOKAHEAD( "[" )            s = listOfSchema()   { return s; } |
+                              s = simpleSchema()   { return s; }
+}
+
+/**
+ * simpleSchema は定数または変数である
+ */
+Schema simpleSchema() :
+{
+}
+{
+/**
+ * 整数を含む実数値としなければならない．
+ */
+  ( <CONSTANT> | <INTEGER> | <POS_ACTUAL_NUM> | <NEG_ACTUAL_NUM> )
+  {
+    Schema s_con = Schema.createConstant(symbolTable.put(token.image));
+    termTable.put(s_con);
+    return s_con; 
+  } 
+  | <VARIABLE> 
+  {
+    return Schema.createVariable(varNameTable.put(token.image)); 
+  }
+  | <UNNAMED> 
+  {
+    return Schema.createVariable(varNameTable.put());
+  }
+}
+
+/**
+ * compoundSchema は述語もしくは関数である
+ */
+Schema compoundSchema() :
+{
+	Token name = null;
+	List  args = null;
+}
+{
+	name = <CONSTANT> "(" args = schemaArgs() ")"
+	{ 
+		Schema s_func = Schema.createFunction(symbolTable.put(name.image), args);
+		termTable.put(s_func);
+		return s_func; 
+	}
+}
+	
+/**
+ * listOfSchema は schema のリストである
+ */
+Schema listOfSchema() :
+{
+  LinkedList<Schema> list = new LinkedList<Schema>();
+  Schema     tail = null;
+}
+{
+  LOOKAHEAD( "[" "]" ) "[" "]"
+  {
+    return Schema.createConstant(symbolTable.put("[]")); 
+  }
+  |
+  "[" listOfSchemaAux(list) ("|" tail = schema() ) ? "]"
+  {
+    if (tail != null)
+      list.add(tail);
+    else
+      list.add(Schema.createConstant(symbolTable.put("[]")));
+
+    LinkedList<Schema> args = new LinkedList<Schema>();
+    args.addFirst(list.removeLast());
+    args.addFirst(list.removeLast());
+    Schema s = Schema.createFunction(symbolTable.put("."), args);
+    
+    while (!list.isEmpty()) {
+      args.clear();
+      args.addFirst(s);
+      args.addFirst(list.removeLast());
+      s = Schema.createFunction(symbolTable.put("."), args);
+    }
+
+    return s;
+  }
+}
+
+/**
+ * listOfSchemaAux は，１つ以上の schema のリストである
+ */
+void listOfSchemaAux(List<Schema> list) :
+{
+  Schema s1 = null;
+  Schema s2 = null;
+}
+{
+  s1 = schema()
+  {
+    list.add(s1);
+  }
+  ( "," listOfSchemaAux(list) ) ? 
+}

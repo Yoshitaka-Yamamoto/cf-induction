@@ -1,0 +1,31 @@
+%%%
+% Date: 2012/06/27
+% Made by Yoshitaka Yamamoto
+% 
+% Reference: Example 6.1 in Page 127 of the following:
+% K. Inoue
+% Induction as consequence finding
+% Journal of Machine Learning, 55 (2004)
+%   
+%
+%%%
+
+
+modeb(1, n(#node)).
+modeh(1, n(#node)).
+
+type(a, node).
+type(b, node).
+type(d, node).
+type(e, node).
+type(g, node).
+
+cnf(an, bg, [ n(a), n(b) ] ).
+cnf(an, bg, [ -n(a), n(e) ] ).
+cnf(an, bg, [ -n(b), n(e) ] ).
+cnf(an, bg, [ -n(d), n(g) ] ).
+
+cnf(an, obs,[ n(g) ] ).
+
+induction_field( length[0:2], size[0:1] ).
+

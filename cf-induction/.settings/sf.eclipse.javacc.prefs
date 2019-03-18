@@ -1,0 +1,11 @@
+#Fri Sep 18 00:30:26 JST 2009
+CLEAR_CONSOLE=true
+JAVACC_OPTIONS=
+JJDOC_OPTIONS=
+JJTREE_OPTIONS=
+JJ_NATURE=true
+JTB_OPTIONS=
+RUNTIME_JAR=C\:\\usr\\local\\eclipse\\plugins\\sf.eclipse.javacc_1.5.12\\javacc.jar
+SHOW_CONSOLE=true
+SUPPRESS_WARNINGS=true
+eclipse.preferences.version=1

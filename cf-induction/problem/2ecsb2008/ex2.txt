@@ -1,0 +1,77 @@
+%%%
+% Date: 2012/06/28
+% Made by Yoshitaka Yamamoto
+% 
+% Reference: Example of the metabolic pathway of Pyruvate in the following:
+% Y. Yamamoto, K. Inoue and K. Inoue.
+% Elements of Computational Systems Biology (2008)
+%
+%
+%%%
+
+%%%	
+% Mode declarations
+%%%
+
+modeh(1, con(+metabolite, #status)).
+modeb(1, con(-metabolite, #status)).
+modeb(1, act(+metabolite, +metabolite)).
+modeh(1, act(#metabolite, #metabolite)).
+
+
+
+%%%
+% Type of variables
+%%%
+
+type(ethanol, metabolite).
+type(pyruvate, metabolite).
+type(acetylcoa, metabolite).
+type(acetaldehyde, metabolite).
+type(glucose, metabolite).
+type(glucosep, metabolite).
+type(acetate, metabolite).
+type(up, status).
+type(down, status).
+
+
+%%%
+% Induction field
+%%%
+
+induction_field(
+length[0:3],
+[+-con(glucose, up), +-con(glucosep, up), +-con(pyruvate, up), +-con(acetaldehyde, up), +con(ethanol, up),
+ +-act(glucose, glucosep), +-act(glucosep, pyruvate), +-act(pyruvate, acetaldehyde), +-act(acetaldehyde, ethanol) ]).
+
+% Background theory B
+
+cnf(an, bg, [ terminal(ethanol) ]).
+cnf(an, bg, [ reac(pyruvate, acetylcoa) ]).
+cnf(an, bg, [ reac(pyruvate, acetaldehyde) ]).
+cnf(an, bg, [ reac(glucose, glucosep) ]).
+cnf(an, bg, [ reac(glucosep, pyruvate) ]).
+cnf(an, bg, [ reac(acetaldehyde, acetate) ]).
+cnf(an, bg, [ reac(acetate, acetylcoa) ]).
+cnf(an, bg, [ reac(acetaldehyde, ethanol) ]).
+
+cnf(an, bg, [ blocked(X), -reac(X, Z), act(X, Z) ]).
+cnf(an, bg, [ blocked(X), -terminal(X) ]). 
+cnf(an, bg, [ con(X, up), -reac(Y, X), -act(Y, X), -blocked(X) ]).
+cnf(an, bg, [ con(glucose, up) ]).
+%cnf(an, bg, [ -con(X, up), -con(X, down) ]).
+
+% Hypothesis H
+%[act(acetaldehyde, ethanol)]
+%[act(glucose, glucosep)]
+%[con(X_0, up), -con(X_1, up), -act(X_1, X_0)]
+%[act(glucose, pyruvate)]
+
+
+% Examples E
+
+cnf(an, obs, [ con(ethanol, up) ]).
+cnf(an, obs, [ con(pyruvate, up) ]).
+
+% Successful command: java ki.CF problem/2ecsb2008/ex2.txt -r 0.2
+

@@ -1,0 +1,34 @@
+%%%
+% Date: 2012/06/27
+% Made by Yoshitaka Yamamoto
+% 
+% Reference: Example 5.1 in Page 126 of the following:
+% K. Inoue
+% Induction as consequence finding
+% Journal of Machine Learning, 55 (2004)
+%   
+%
+%%%
+
+
+
+modeh(1, dog(+life)).
+modeh(1, pet(+life)).
+modeh(1, small(+life)).
+
+type(c, life).
+
+cnf(an, bg, [ -dog(X), -small(X), pet(X) ] ).
+cnf(an, obs,[ pet(c) ] ).
+
+%induction_field( length[2:2], size[2:2] ).
+
+% Target Hypothesis
+
+% [pet(X_0), small(X_0)]
+% [dog(X_0), pet(X_0)]
+
+% Command
+% java ki.CF problem/1jml2004/ex.4 -onInd
+
+

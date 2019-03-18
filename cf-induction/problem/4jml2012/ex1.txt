@@ -1,0 +1,46 @@
+%%%
+% Date: 2012/05/11
+% Made by Yoshitaka Yamamoto
+%%%
+
+
+% Reference: Example2 in Page 119 of the following:
+% Y. Yamamoto, K. Inoue and K. Iwanuam. 
+% Inverse subsumption for complete explanatory induction
+% Journal of Machine Learning, 86 (2012)
+
+%%%
+% Mode declarations
+%%%
+
+modeh(1, shopping(+man, #date)).
+modeh(1, buy(+man, #item)).
+modeb(1, buy(+man, #item)).
+
+
+%%%
+% Type of variables
+%%%
+
+type(john, man).
+type(diaper, item).
+type(beer, item).
+type(at_night, date).
+
+% Background theory B
+
+
+cnf(an, bg, [buy(john, diaper), buy(john, beer)]).
+
+% Examples E
+
+cnf(an, obs, [shopping(john, at_night)]).
+
+
+% Target hypothesis
+% shopping(X_0, at_night) <= buy(X_0, beer)
+% buy(X_0, beer) <= buy(X_0, diaper)
+
+% Command
+% java ki.CF problem/4jml2012/ex1.txt -e -onInd
+

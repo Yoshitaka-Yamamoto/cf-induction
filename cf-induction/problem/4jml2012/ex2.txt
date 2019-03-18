@@ -1,0 +1,50 @@
+%%%
+% Date: 2012/06/21
+% Made by Yoshitaka Yamamoto
+% 
+% Reference: Example1 in Page 117 of the following:
+% Y. Yamamoto, K. Inoue and K. Iwanuam. 
+% Inverse subsumption for complete explanatory induction
+% Journal of Machine Learning, 86 (2012)
+%   
+%
+%%%
+
+%%%
+% Mode declarations
+%%%
+
+modeh(1, defeat(#human)).
+modeh(1, risk_life(#human)).
+modeb(1, risk_life(#human)).
+
+%%%
+% Type of variables
+%%%
+
+type(hamlet, human).
+type(claudius, human).
+
+
+induction_field(length[1:2], size[1:2]).
+
+% Background theory B
+
+
+% Examples E
+
+cnf(an, obs, [ defeat(claudius) ]).
+
+
+% Target hypothesis
+% risk_life(hamlet) and
+% (defeat(claudius) <= risk_life(hamlet))
+
+% Command
+% java ki.CF problem/4jml2012/ex1.txt -e -r 0.4
+
+% Notes on the options
+% -e: enumeration of the hypotheses
+% -r: the ratio to determine the threshold value (it is set to 1 in default, but
+% if you need to construct some redundant hypotheses in the point of evaluation function values)
+

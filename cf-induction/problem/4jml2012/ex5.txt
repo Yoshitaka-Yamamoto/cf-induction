@@ -1,0 +1,54 @@
+%%%
+% Date: 2012/06/21
+% Made by Yoshitaka Yamamoto
+% 
+% Reference: Example13 in Page 127 of the following:
+% Y. Yamamoto, K. Inoue and K. Iwanuam. 
+% Inverse subsumption for complete explanatory induction
+% Journal of Machine Learning, 86 (2012)
+%   
+%
+%%%
+
+%%%
+% Mode declarations
+%%%
+
+modeh(1, induced(#material)).
+modeb(1, induced(#material)).
+modeh(1, glycolysis(#status)).
+modeb(1, active(#material)).
+
+%%%
+% Type (Seeds) of variables
+%%%
+
+type(glucose, material).
+type(hxt, material).
+type(snf3, material).
+type(on, status).
+
+%%%
+% Induction field
+%% 
+
+induction_field(  length[2:2], size[2:2]  ).
+
+%%%
+% Background theory B
+%%%
+
+cnf(an, bg, [ -ext(glucose), induced(hxt), active(snf3) ]).
+
+% Examples E
+
+cnf(an, obs, [ -ext(glucose), glycolysis(on) ]).
+
+% Target hypothesis H
+% [induced(hxt), -active(snf3)]
+% [-induced(hxt), glycolysis(on)]
+
+% Command
+% java ki.CF problem/4jml2012/ex4.txt -e -r 0.4
+
+

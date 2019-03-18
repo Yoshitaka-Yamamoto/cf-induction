@@ -1,0 +1,3 @@
+cnf(an, top_clause,[-p(f(a)), p(f(f(a))), -p(a)]).
+cnf(an, top_clause,[p(f(a)), p(f(f(a))), -p(a)]).
+cnf(an,axiom,[p(a)]).

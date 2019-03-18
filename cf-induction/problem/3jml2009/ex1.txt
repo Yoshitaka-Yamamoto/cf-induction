@@ -1,0 +1,52 @@
+%%%
+% Date: 2012/05/11
+% Made by Yoshitaka Yamamoto
+%%%
+
+% Reference: Example 2 in Page 43 of the following:
+% A. Tamaddoni-Nezhad and S. Muggleton
+% The lattice struct and refinement operators for the hypothesis
+% space bounded by a bottom clause
+% Journal of Machine Learning, 76 (2009)
+
+
+
+%%%
+% Mode declarations
+%%%
+
+modeh(1, add(+bin, +bin, -bin, -bin)).
+modeb(1, xor(+bin, +bin, -bin)).
+modeb(1, and(+bin, +bin, -bin)).
+
+%%%
+% Type of variables
+%%%
+
+type(0, bin).
+type(1, bin).
+
+% Background theory B
+
+cnf(an, bg, [ and(0, 0, 0) ]).
+cnf(an, bg, [ and(0, 1, 0) ]).
+cnf(an, bg, [ and(1, 0, 0) ]).
+cnf(an, bg, [ and(1, 1, 1) ]).
+
+cnf(an, bg, [ xor(0, 0, 0) ]).
+cnf(an, bg, [ xor(0, 1, 1) ]).
+cnf(an, bg, [ xor(1, 0, 1) ]).
+cnf(an, bg, [ xor(1, 1, 0) ]).
+
+
+% Examples E
+cnf(an, obs, [ add(0, 1, 1, 0) ]).
+cnf(an, obs, [ add(1, 1, 0, 1) ]).
+cnf(an, obs, [ add(1, 0, 1, 0) ]).
+cnf(an, obs, [ add(0, 0, 0, 0) ]).
+
+
+% Target hypothesis
+% add(A, B, C, D) <= and(A, B, D) and xor(A, B, C)
+
+% Command: java ki.CF -e problem/3jml2009/ex1.txt
